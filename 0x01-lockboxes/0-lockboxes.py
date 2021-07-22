@@ -3,17 +3,13 @@
 
 
 def canUnlockAll(boxes):
-    """lockbox function"""
-    newlist = []
-    k = len(boxes)
-    for i in boxes:
-        if len(i) == 0 and i is not boxes[k-1]:
-            return False
-        for j in i:
-            newlist.append(j)
-    for index, keys in enumerate(boxes):
-        if index in newlist or index < k-1:
-            pass
-        else:
-            return False
+    """ determining if all boxes can be opened """
+    for key in range(1, len(boxes) - 1):
+        res = False
+        for index in range(len(boxes)):
+            res = key in boxes[index] and key != index
+            if res:
+                break
+        if res is False:
+            return res
     return True
