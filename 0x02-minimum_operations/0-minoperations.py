@@ -15,7 +15,7 @@ def minOperations(n):
     variable2 = 2
     variable3 = 0
 
-    for i in range(1, variable1):
+    for i in range(2, variable1):
         if variable1 % variable2 == 0:
             variable1 = variable1 / variable2
             variable3 = variable3 + variable2
