@@ -2,40 +2,65 @@
 """
 stats
 """
-
+import re
+import signal
 import sys
 
-STATUS = {'200': 0,
-          '301': 0,
-          '400': 0,
-          '401': 0,
-          '403': 0,
-          '404': 0,
-          '405': 0,
-          '500': 0}
 
-total_size = 0
-n = 0
-try:
-    for argument in sys.stdin:
-        arguments = argument.split(" ")
-        if len(arguments) > 2:
-            status = arguments[-2]
-            file_size = int(arguments[-1])
-            if status in STATUS:
-                STATUS[status] += 1
-            total_size += file_size
-            n += 1
-            if n == 10:
-                print("File size: {:d}".format(total_size))
-                for key, value in sorted(STATUS.items()):
-                    if value != 0:
-                        print("{}: {:d}".format(key, value))
-                n = 0
-except KeyboardInterrupt:
+def print_info(info, size):
+    codes = list(info.keys())
+    codes.sort()
+    print("File size: {}".format(size))
+    for code in codes:
+        print("{}: {}".format(code, info[code]))
+
+
+def signal_handler(sig, frame):
     pass
-finally:
-    print("File size: {:d}".format(total_size))
-    for key, value in sorted(STATUS.items()):
-        if value != 0:
-            print("{}: {:d}".format(key, value))
+
+
+def main():
+    valid_codes = [200, 301, 400, 401, 403, 404, 405, 500]
+    regex = {
+        "ip":
+            r"((?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}"
+            "(?:25[0-5]|2[0-4]\d|1?\d?\d)|\w+)",
+
+        "date": r"(20\d{2}-[01]?\d-(?:3[01]|[0-2]\d))",
+
+        "time": "([0-5]\d:[0-5]\d:[0-5]\d\.\d+)",
+
+        "code": "(\w+)",
+
+        "size": "(\d+)",
+
+        "path": "/projects/260"
+    }
+
+    pattern = \
+        '^{ip} ?- ?\[{date} {time}\] "GET {path} HTTP/1.1" {code} {size}$'
+    pattern = pattern.format(**regex)
+
+    line_counter = 0
+    code_counter = {}
+    sizes = 0
+    signal.signal(signal.SIGINT, signal_handler)
+    for line in sys.stdin:
+        out = re.match(pattern, line)
+        if out:
+            line_counter += 1
+            sizes += int(out.group(5))
+            code = out.group(4)
+            if code in map(str, valid_codes):
+                if code not in code_counter.keys():
+                    code_counter[code] = 1
+                else:
+                    code_counter[code] += 1
+            if line_counter % 10 == 0:
+                print_info(code_counter, sizes)
+    if line_counter == 0 or line_counter % 10 != 0:
+        print_info(code_counter, sizes)
+
+
+if __name__ == "__main__":
+    main()
