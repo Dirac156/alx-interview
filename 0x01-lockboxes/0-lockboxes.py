@@ -1,19 +1,15 @@
 #!/usr/bin/python3
-"""lockbox interview question"""
+"""
+Method that determines if all the boxes can be opened.
+"""
 
 
 def canUnlockAll(boxes):
-    """lockbox function"""
-    newlist = []
-    k = len(boxes)
-    for i in boxes:
-        if len(i) == 0 and i is not boxes[k-1]:
-            return False
-        for j in i:
-            newlist.append(j)
-    for index, keys in enumerate(boxes):
-        if index in newlist or index < k-1:
-            pass
-        else:
-            return False
-    return True
+    num_of_boxes = len(boxes)
+    list_of_keys = boxes[0]
+    box_locked = [False] + [True] * (num_of_boxes - 1)
+    for key in list_of_keys:
+        if ((key < num_of_boxes) and (box_locked[key] is True)):
+            box_locked[key] = False
+            list_of_keys.extend(boxes[key])
+    return not any(box_locked)
