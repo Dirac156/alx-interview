@@ -26,7 +26,7 @@ def rotate_2d_matrix(matrix):
 
         for vector_id in range(len(matrix)):
             vector_id_to_choose = len(matrix) - 1 - vector_id
-            print(matrix[vector_id_to_choose][idx])
+            new_vector.append(matrix[vector_id_to_choose][idx])
 
         rotated_matrix.append(new_vector)
 
