@@ -1,4 +1,5 @@
 """ n-queens """
+#!/usr/bin/python3
 import sys
 
 
