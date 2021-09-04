@@ -3,118 +3,102 @@
 import sys
 
 
-def print_board(board):
-    """ print_board
-    Args:
-        board - list of list with length sys.argv[1]
+def is_not_safe_position(board, i, j, r):
     """
-    new_list = []
-    for i, row in enumerate(board):
-        value = []
-        for j, col in enumerate(row):
-            if col == 1:
-                value.append(i)
-                value.append(j)
-        new_list.append(value)
-
-    print(new_list)
-
-
-def isSafe(board, row, col, number):
-    """ isSafe
+    Method that determines if position (i, j) on the chessboard is safe
+    to allocate a queen.
     Args:
-        board - list of list with length sys.argv[1]
-        row - row to check if is safe doing a movement in this position
-        col - col to check if is safe doing a movement in this position
-        number: size of the board
-    Return: True of False
-    """
-
-    # Check this row in the left side
-    for i in range(col):
-        if board[row][i] == 1:
-            return False
-
-    # Check upper diagonal on left side
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
-
-    for i, j in zip(range(row, number, 1), range(col, -1, -1)):
-        if board[i][j] == 1:
-            return False
-
-    return True
-
-
-def solveNQUtil(board, col, number):
-    """ Auxiliar method to find the posibilities of answer
-    Args:
-        board - Board to resolve
-        col - Number of col
-        number - size of the board
+        - board (list):     list
+        - i     (int):      x coordinate to be evaluated
+        - j     (int):      y coordinate to be evaluated
+        - r     (int):      current row
     Returns:
-        All the posibilites to solve the problem
+        True    (bool):     in case it is safe
+        False   (bool):     in case it is not safe
     """
 
-    if (col == number):
-        print_board(board)
+    # Is board[i] in line of attack ?
+    if (board[i] == j) or (board[i] == j - i + r) or (board[i] == i - r + j):
         return True
-    res = False
-    for i in range(number):
-
-        if (isSafe(board, i, col, number)):
-
-            # Place this queen in board[i][col]
-            board[i][col] = 1
-
-            # Make result true if any placement
-            # is possible
-            res = solveNQUtil(board, col + 1, number) or res
-
-            board[i][col] = 0  # BACKTRACK
-
-    return res
+    return False
 
 
-def solve(number):
-    """ Find all the posibilities if exists
-    Args:
-        number - size of the board
+def find_positions(board, row, n):
     """
-    board = [[0 for i in range(number)]for i in range(number)]
-
-    if not solveNQUtil(board, 0, number):
-        return False
-
-    return True
-
-
-def validate(args):
-    """ Validate the input data to verify if the size to
-        answer is posible
+    Recursive method that finds all safe position (i, j) where n queens
+    can be allocated.
     Args:
-        args - sys.argv
+        - board (list):     list
+        - row   (int):      current row
+        - n     (int):      number of queens to be allocated
+    Returns:
+        -       (lists):    lists of all possible solutions
     """
-    if (len(args) == 2):
-        # Validate data
-        try:
-            number = int(args[1])
-        except Exception:
-            print("N must be a number")
-            exit(1)
-        if number < 4:
-            print("N must be at least 4")
-            exit(1)
-        return number
+
+    if row == n:
+        print_chess_board(board, n)
+
     else:
-        print("Usage: nqueens N")
-        exit(1)
+        for j in range(n):
+            legal = True
+            for i in range(row):
+                if is_not_safe_position(board, i, j, row):
+                    legal = False
+            if legal:
+                board[row] = j
+                find_positions(board, row + 1, n)
 
 
-if __name__ == "__main__":
-    """ Main method to execute the application
+def print_chess_board(board, n):
+    """
+    Method that generates the list of positions (i, j) where n queens
+    were allocated.
+    Args:
+        - board (list):     list
+        - n     (int):      number of queens to be allocated
+    Returns:
+        - nothing
     """
 
-    number = validate(sys.argv)
-    solve(number)
+    b = []
+
+    for i in range(n):
+        for j in range(n):
+            if j == board[i]:
+                b.append([i, j])
+    print(b)
+
+
+def create_chess_board(size):
+    """
+    Method that generates a list of zeros
+    Args:
+        - size  (int):      number of queens to be allocated
+    Returns:
+        - board (list)
+    """
+
+    return [0 * size for i in range(size)]
+
+
+# 1. Read and validate size of the board
+if len(sys.argv) != 2:
+    print("Usage: nqueens N")
+    exit(1)
+
+try:
+    n = int(sys.argv[1])
+except BaseException:
+    print("N must be a number")
+    exit(1)
+
+if (n < 4):
+    print("N must be at least 4")
+    exit(1)
+
+# 2. Generate the board
+board = create_chess_board(int(n))
+
+# 3. Find the solutions
+row = 0
+find_positions(board, row, int(n))
