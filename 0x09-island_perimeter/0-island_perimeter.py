@@ -6,21 +6,16 @@ def island_perimeter(grid):
     """
     Find perimeter of the island
     """
-    count = 0
-    rows = len(grid)
-    columns = 0
-    if (rows):
-        col = len(grid[0])
+    perimeter = 0
+    m = len(grid)
+    n = len(grid[0])
 
-    for i in range(len(grid)):
-        for j in range(len(grid[i])):
+    for i in range(m):
+        for j in range(n):
+            if grid[i][j] == 1:
+                for x, y in [(0, 1), (1, 0), (-1, 0), (0, -1)]:
+                    α, β = i + x, j + y
+                    if α >= m or β >= n or α < 0 or β < 0 or grid[α][β] == 0:
+                        perimeter += 1
 
-            idx = [(i - 1, j), (i, j - 1), (i, j + 1), (i + 1, j)]
-            check = [1 if k[0] in range(rows) and k[1] in range(columns) else 0
-                     for k in idx]
-
-            if grid[i][j]:
-                count += sum([1 if not r or not grid[k[0]][k[1]] else 0
-                              for r, k in zip(check, idx)])
-
-    return (count)
+    return perimeter
